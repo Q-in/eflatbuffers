@@ -1,4 +1,4 @@
-Nonterminals root definition option fields field key_def value attribute_def attributes atoms atom.
+Nonterminals root definition option enumfields enumfield fields field key_def value attribute_def attributes atoms atom.
 Terminals  table struct enum union namespace root_type include attribute file_identifier file_extension float int bool string '}' '{' '(' ')' '[' ']' ';' ',' ':' '=' quote.
 Rootsymbol root.
 
@@ -20,8 +20,15 @@ option -> file_extension quote string quote ';'  : #{get_name('$1') => get_value
 % definitions
 definition -> table string '{' fields '}'           : #{get_value_atom('$2') => {table, '$4'} }.
 definition -> table string '{' '}'                  : #{get_value_atom('$2') => {table, []} }.
-definition -> enum string ':' string '{' atoms '}'  : #{get_value_atom('$2') => {{enum, get_value_atom('$4')}, '$6' }}.
+definition -> enum string ':' string '{' enumfields '}'  : #{get_value_atom('$2') => {{enum, get_value_atom('$4')}, '$6' }}.
 definition -> union string '{' atoms '}'            : #{get_value_atom('$2') => {union, '$4'} }.
+
+enumfields -> enumfield : [ '$1' ].
+enumfields -> enumfield ',' enumfields : [ '$1' | '$3'].
+
+% enum
+enumfield -> atom : '$1'.
+enumfield -> atom '=' int : { '$1', get_value('$3') }.
 
 % tables
 fields -> field ';'         : [ '$1' ].
