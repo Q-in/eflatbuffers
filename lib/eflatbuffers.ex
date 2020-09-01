@@ -15,8 +15,15 @@ defmodule Eflatbuffers do
     write!(map, parse_schema!(schema_str))
   end
 
-  def write!(map, {_, %{root_type: root_type} = options} = schema) do
+
+ def write!(map, {_, %{root_type: root_type} = options} = schema) do
     root_table = [<< vtable_offset :: little-size(16) >> | _] = Eflatbuffers.Writer.write({:table, %{ name: root_type }}, map, [], schema)
+    root_table = :erlang.iolist_to_binary root_table
+
+    aling_to_4 = case rem(byte_size(root_table), 4) do
+      0 -> ""
+      x -> :binary.copy <<0>>, x
+    end
 
     file_identifier =
       case Map.get(options, :file_identifier) do
@@ -25,7 +32,8 @@ defmodule Eflatbuffers do
         _                     -> << 0, 0, 0, 0 >>
       end
 
-    [<< (vtable_offset + 4 + byte_size(file_identifier)) :: little-size(32) >>, file_identifier, root_table]
+    vtable_ptr_updated = vtable_offset + 4 + byte_size(file_identifier) + byte_size(aling_to_4)
+    [<< vtable_ptr_updated :: little-size(32) >>, file_identifier, aling_to_4, root_table]
     |> :erlang.iolist_to_binary
   end
 
