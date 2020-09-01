@@ -20,10 +20,7 @@ defmodule Eflatbuffers do
     root_table = [<< vtable_offset :: little-size(16) >> | _] = Eflatbuffers.Writer.write({:table, %{ name: root_type }}, map, [], schema)
     root_table = :erlang.iolist_to_binary root_table
 
-    aling_to_4 = case rem(byte_size(root_table), 4) do
-      0 -> ""
-      x -> :binary.copy <<0>>, x
-    end
+    aling_to_4 = :binary.copy <<0>>, rem(byte_size(root_table), 4) 
 
     file_identifier =
       case Map.get(options, :file_identifier) do
