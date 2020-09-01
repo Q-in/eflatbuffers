@@ -20,6 +20,7 @@ defmodule Eflatbuffers do
 
     file_identifier =
       case Map.get(options, :file_identifier) do
+        :skip                 -> <<>>
         << bin :: size(32) >> -> << bin :: size(32) >>
         _                     -> << 0, 0, 0, 0 >>
       end
