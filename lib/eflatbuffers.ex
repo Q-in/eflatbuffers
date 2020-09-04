@@ -62,7 +62,8 @@ defmodule Eflatbuffers do
 
   def match_identifiers( << _::size(4)-binary, identifier_data::size(4)-binary, _::binary >>, schema_options) do
     case Map.get(schema_options, :file_identifier) do
-      # nothing in schema
+     :skip                 -> :ok 
+       # nothing in schema
       nil                -> :ok
       # schema matches data
       ^identifier_data   -> :ok
