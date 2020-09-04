@@ -63,7 +63,7 @@ defmodule Eflatbuffers.Writer do
     #when pushing a string should append a byte 0 at the end
     #when pushing a vector should align the existing buffer to 4
     padding = 4 - rem(byte_size(string) + 1, 4)
-    << byte_size(string) :: unsigned-little-size(32) >> <> string <> :binary.copy(<<0>>, padding) 
+    << byte_size(string) :: unsigned-little-size(32) >> <> string <> <<0>> <> :binary.copy(<<0>>, padding) 
   end
 
   def write({:vector, options}, values, path, schema) when is_list(values) do
