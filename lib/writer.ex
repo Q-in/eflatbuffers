@@ -123,11 +123,18 @@ defmodule Eflatbuffers.Writer do
     # so if something goes wrong it's easy to see
     # that it was a map key
     [data_buffer, data] = data_buffer_and_data(names_types, values, path, schema)
-    vtable              = vtable(data_buffer)
+ 
+    dlen = IO.iodata_length data_buffer
+    padding = 4 - (rem dlen, 4)
+    bpadding = :binary.copy <<0>>, padding 
+
+
+    #IO.inspect {data_buffer, data}
+    vtable              = vtable(data_buffer, padding)
     springboard         = << (:erlang.iolist_size(vtable) + 4) :: little-size(32) >>
-    data_buffer_length  = << :erlang.iolist_size([springboard, data_buffer]) :: little-size(16) >>
+    data_buffer_length  = << :erlang.iolist_size([springboard, bpadding, data_buffer]) :: little-size(16) >>
     vtable_length       = << :erlang.iolist_size([vtable, springboard])      :: little-size(16) >>
-    [vtable_length, data_buffer_length, vtable, springboard, data_buffer, data]
+    [vtable_length, data_buffer_length, vtable, springboard, bpadding, data_buffer, data]
   end
 
   # fail if nothing matches
@@ -207,8 +214,8 @@ defmodule Eflatbuffers.Writer do
   end
 
 
-  def vtable(data_buffer) do
-    Enum.reverse(vtable(data_buffer, {[], 4}))
+  def vtable(data_buffer, padding) when is_integer(padding) do
+    Enum.reverse(vtable(data_buffer, {[], 4 + padding}))
   end
 
   def vtable([], {acc, _offset}) do
