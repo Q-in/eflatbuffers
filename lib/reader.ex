@@ -173,7 +173,7 @@ defmodule Eflatbuffers.Reader do
     {_, enum_options} = Map.get(tables, options.name)
     {_, %{ default: default }} = enum_options.type
 
-    map_new = Map.put(map, name, Atom.to_string(Map.get(enum_options.members, default)))
+    map_new = Map.put(map, name, Map.get(enum_options.members, default))
     read_table_fields(fields, vtable, data_buffer_pointer, data, schema, map_new)
   end
   def read_table_fields([{name, { _type, options }} | fields],     << 0, 0, vtable :: binary >>, data_buffer_pointer, data, schema, map) do
