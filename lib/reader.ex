@@ -84,8 +84,7 @@ defmodule Eflatbuffers.Reader do
     case Map.get(members, index) do
       nil ->
         throw({:error, {:not_in_enum, index, members}})
-      value_atom ->
-        Atom.to_string(value_atom)
+      value_atom -> value_atom
     end
   end
 
