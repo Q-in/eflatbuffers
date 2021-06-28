@@ -77,17 +77,16 @@ defmodule Eflatbuffers.Writer do
     [ << vector_length :: little-size(32) >>, data_buffer_and_data(index_types, values, path, schema) ]
   end
 
-  def write({:enum, options = %{ name: enum_name }}, value, path, {tables, _} = schema) when is_binary(value) do
+  def write({:enum, options = %{ name: enum_name }}, value, path, {tables, _} = schema) when is_atom(value) do
     {:enum, enum_options} =  Map.get(tables, enum_name)
     members = enum_options.members
     {type, type_options}    = enum_options.type
     # if we got handed some defaults from outside,
     # we put them in here
     type_options = Map.merge(type_options, options)
-    value_atom = :erlang.binary_to_existing_atom(value, :utf8)
-    index = Map.get(members, value_atom)
+    index = Map.get(members, value)
     case index do
-      nil -> throw({:error, {:not_in_enum, value_atom, members}})
+      nil -> throw({:error, {:not_in_enum, value, members}})
       _   -> write({type, type_options}, index, path, schema)
     end
   end
